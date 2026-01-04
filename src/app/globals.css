@@ -1,26 +1,265 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ===== layout & UI ===== */
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.card {
+  background: rgba(18,18,26,.86);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.28);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.h1 {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06);
+  cursor: pointer;
+}
+
+.btnPrimary {
+  background: #6d5efc;
+  color: white;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.05);
+}
+
+.muted { color: rgba(255,255,255,.65); }
+
+.list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.item { padding: 14px; }
+
+.title { font-weight: 700; font-size: 16px; }
+
+.meta { font-size: 12px; color: rgba(255,255,255,.65); }
+/* ===== Fix: dark theme base (append) ===== */
+:root{
+  --bg:#0b0f1a;
+  --card:#141a2a;
+  --card2:#0f1422;
+  --border:rgba(255,255,255,.10);
+  --text:rgba(255,255,255,.92);
+  --muted:rgba(255,255,255,.66);
+  --primary:#7c5cff;
+}
+
+html, body{
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(124,92,255,.22), transparent 60%),
+              radial-gradient(900px 500px at 70% 30%, rgba(0,184,255,.12), transparent 60%),
+              var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* これが超大事：リンクの紫を殺す */
+a{
+  color: inherit !important;
+  text-decoration: none;
+}
+a:hover{ text-decoration: underline; }
+
+/* containerが白背景で浮いてるのを防ぐ */
+.container{
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+}
+
+/* cardの見た目を統一 */
+.card{
+  background: rgba(20,26,42,.88);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.35);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+}
+
+.h1{
+  color: var(--text);
+  font-size: 28px;
+  margin: 0 0 10px;
+}
+
+.muted{ color: var(--muted); }
+
+.row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* ボタン：文字色を強制して紫リンク化を防止 */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
+  color: var(--text) !important;
+  cursor:pointer;
+}
+.btn:hover{ background: rgba(255,255,255,.10); }
+
+.btnPrimary{
+  background: var(--primary);
+  color: #fff !important;
+  border-color: rgba(255,255,255,.18);
+}
+.btnPrimary:hover{ filter: brightness(1.05); }
+
+.input, .textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+}
+.textarea{ min-height: 120px; }
+
+.list{
+  display:grid;
+  gap:12px;
+  margin-top:14px;
+  padding:0;
+  list-style:none;
+}
+
+.item{
+  padding:14px;
+  background: rgba(15,20,34,.85);
+}
+
+.title{ font-weight: 700; font-size: 16px; }
+.meta{ font-size: 12px; color: var(--muted); }
+
+
+html {
+  height: 100%;
+  background: var(--bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(124,92,255,.22), transparent 60%),
+              radial-gradient(900px 500px at 70% 30%, rgba(0,184,255,.12), transparent 60%),
+              var(--bg) !important;
+  background-attachment: fixed; /* これが効く：スクロールしても背景が続く */
+  color: var(--text) !important;
 }
+/* ===== Form layout ===== */
+.form {
+  max-width: 720px;          /* フォーム全体の横幅を固定 */
+}
+
+.formGroup {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.formLabel {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.input {
+  height: 44px;              /* inputの高さを統一 */
+  font-size: 15px;
+}
+
+.textarea {
+  min-height: 160px;         /* textareaの高さを固定 */
+  resize: vertical;          /* 縦だけリサイズ可（好みで none でもOK） */
+  font-size: 15px;
+}
+
+.formActions {
+  margin-top: 24px;
+}
+
+/* ===== Form layout ===== */
+.form {
+  max-width: 720px; /* 入力欄の横幅を統一 */
+}
+
+.formGroup {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.formLabel {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.input {
+  height: 44px;     /* inputの高さ統一 */
+  font-size: 15px;
+}
+
+.textarea {
+  min-height: 160px; /* textareaの高さ統一 */
+  resize: vertical;
+  font-size: 15px;
+}
+
+.formActions {
+  margin-top: 24px;
+}
+
+.form {
+  max-width: 720px;
+  margin: 0 auto;   /* ★ これ */
+}
+.formActions {
+  margin-top: 28px;
+  display: flex;
+  justify-content: flex-end;
+}
+.btnPrimary {
+  padding: 12px 20px;
+  font-size: 15px;
+}
+.textarea {
+  min-height: 140px; /* 160 → 140 */
+}
+
+.form {
+  max-width: 720px;
+  margin: 0 auto; /* ★中央寄せ */
+}
+
