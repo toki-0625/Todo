@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function POST(
-  req: Request,
+  req: NextRequest,
   ctx: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await ctx.params;
+  const { id } = await ctx.params; // ★Promiseをawaitで取り出す
 
   const cookieStore = await cookies();
 
@@ -33,19 +33,16 @@ export async function POST(
   const detailRaw = formData.get("detail");
   const detail = detailRaw === null ? null : String(detailRaw);
 
-  if (!title) return new NextResponse("title is required", { status: 400 });
+  if (!title) {
+    return new NextResponse("title is required", { status: 400 });
+  }
 
-  const { error } = await supabase
-    .from("todos")
-    .update({ title, detail })
-    .eq("id", id);
+  const { error } = await supabase.from("todos").update({ title, detail }).eq("id", id);
 
   if (error) {
     console.error("UPDATE ERROR:", error);
     return new NextResponse(error.message, { status: 400 });
   }
-
-  console.log("UPDATED ID:", id);
 
   const url = new URL(req.url);
   return NextResponse.redirect(new URL(`/todos/${id}`, url.origin), {

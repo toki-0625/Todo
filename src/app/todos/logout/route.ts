@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function GET(req: Request) {
-  const cookieStore = cookies();
+export async function GET(req: NextRequest) {
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value;
+          return cookieStore.get(name)?.value ?? null;
         },
         set(name: string, value: string, options: any) {
           cookieStore.set({ name, value, ...options });
@@ -26,5 +26,5 @@ export async function GET(req: Request) {
   await supabase.auth.signOut();
 
   const url = new URL(req.url);
-  return NextResponse.redirect(new URL("/login", url.origin));
+  return NextResponse.redirect(new URL("/login", url.origin), { status: 303 });
 }

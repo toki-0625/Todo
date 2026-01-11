@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function GET(req: Request) {
-  const cookieStore = await cookies();
+export async function GET(req: NextRequest) {
+  const cookieStore = await cookies(); // ★ここが超重要
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,5 +26,5 @@ export async function GET(req: Request) {
   await supabase.auth.signOut();
 
   const url = new URL(req.url);
-  return NextResponse.redirect(new URL("/login", url.origin));
+  return NextResponse.redirect(new URL("/login", url.origin), { status: 303 });
 }
