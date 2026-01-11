@@ -42,7 +42,7 @@ export default async function TodosPage() {
             Todo一覧
           </h1>
           <p className="muted" style={{ margin: "6px 0 0" }}>
-            ログイン中のユーザーのTodoだけ表示されます（RLS）
+            ログイン中のユーザーのTodoだけ表示されます
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export default async function TodosPage() {
         <div className="card" style={{ padding: 16, marginTop: 14 }}>
           <p style={{ margin: 0 }}>まだTodoがありません。</p>
           <p className="muted" style={{ margin: "6px 0 0" }}>
-            「新規作成」から追加してみてね。
+            「新規作成」から追加してください。
           </p>
         </div>
       )}
