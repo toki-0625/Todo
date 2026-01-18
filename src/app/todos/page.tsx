@@ -25,7 +25,7 @@ export default async function TodosPage() {
   const supabase = await createSupabaseServer();
 
   const { data: userRes } = await supabase.auth.getUser();
-  if (!userRes.user) redirect("/login");
+  // redirectしない
 
   const { data, error } = await supabase
     .from("todos")
