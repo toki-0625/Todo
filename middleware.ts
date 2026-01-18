@@ -9,26 +9,33 @@ export async function middleware(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value;
+        get: (name) => req.cookies.get(name)?.value,
+        set: (name, value, options) => {
+          res.cookies.set({
+            name,
+            value,
+            ...options,
+            path: "/",        // ★ 必須
+          });
         },
-        set(name: string, value: string, options: any) {
-          res.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options: any) {
-          res.cookies.set({ name, value: "", ...options });
+        remove: (name, options) => {
+          res.cookies.set({
+            name,
+            value: "",
+            ...options,
+            path: "/",        // ★ 必須
+          });
         },
       },
     }
   );
 
-  // これでセッションの更新が走る（重要）
-  await supabase.auth.getUser();
+  // ★ これがないと refresh されない
+  await supabase.auth.getSession();
 
   return res;
 }
 
-// Supabaseのcookieを使う可能性のあるパスを対象にする
 export const config = {
   matcher: ["/todos/:path*", "/login", "/signup", "/logout"],
 };

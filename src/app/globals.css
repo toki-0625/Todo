@@ -263,3 +263,49 @@ body {
   margin: 0 auto; /* ★中央寄せ */
 }
 
+/* ===== Button (統一版) ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 40px;          /* ← 全ボタン共通サイズ */
+  padding: 0 16px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: rgba(255,255,255,.14);
+}
+
+/* メイン */
+.btnPrimary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.btnPrimary:hover {
+  filter: brightness(1.05);
+}
+
+/* 危険 */
+.btnDanger {
+  background: #ff6b6b;
+  color: #fff;
+  border-color: #ff6b6b;
+}
+.btnDanger:hover {
+  filter: brightness(1.05);
+}
+
+
