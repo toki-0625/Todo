@@ -24,20 +24,21 @@ function formatDate(iso: string) {
 export default async function TodoDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
   const supabase = await createSupabaseServer();
 
   const { data: userRes } = await supabase.auth.getUser();
   if (!userRes.user) redirect("/login");
 
-  const { id } = await params;
+  const { id } = params;
 
   const { data, error } = await supabase
     .from("todos")
     .select("id,user_id,title,detail,created_at")
     .eq("id", id)
     .maybeSingle();
+
 
   if (error) {
     return (
