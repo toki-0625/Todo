@@ -27,10 +27,16 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 🔴 未ログインで /todos 以下に来たら login へ
+  // 🔴 未ログインで /todos 以下 → login
   if (!user && req.nextUrl.pathname.startsWith("/todos")) {
     const loginUrl = new URL("/login", req.url);
-    return NextResponse.redirect(loginUrl);
+
+    // ★ ここが超重要
+    res.headers.set("Location", loginUrl.toString());
+    return new NextResponse(null, {
+      status: 307,
+      headers: res.headers,
+    });
   }
 
   return res;
