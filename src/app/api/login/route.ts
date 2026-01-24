@@ -44,6 +44,5 @@ export async function POST(req: Request) {
     );
   }
 
-  // ✅ ここで cookie がセットされる（重要）
   return NextResponse.json({ ok: true });
 }
