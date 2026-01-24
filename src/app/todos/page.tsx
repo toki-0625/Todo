@@ -25,12 +25,16 @@ export default async function TodosPage() {
   const supabase = await createSupabaseServer();
 
   const { data: userRes } = await supabase.auth.getUser();
-  // redirectしない
+
+  if (!userRes.user) {
+    redirect("/login");
+  }
 
   const { data, error } = await supabase
     .from("todos")
     .select("id,user_id,title,detail,created_at")
     .order("created_at", { ascending: false });
+
 
   const todos = (data ?? []) as Todo[];
 
