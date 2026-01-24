@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 export async function createSupabaseServer() {
-  const cookieStore = await cookies(); // ← ここが重要
+  const cookieStore = await cookies(); // ★ 必須
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
