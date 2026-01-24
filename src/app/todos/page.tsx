@@ -23,9 +23,10 @@ function formatDate(iso: string) {
 export default async function TodosPage() {
   const supabase = await createSupabaseServer();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // ★ 正しいログイン判定はここ
   if (!user) {
     redirect("/login");
   }
@@ -34,6 +35,10 @@ export default async function TodosPage() {
     .from("todos")
     .select("id,user_id,title,detail,created_at")
     .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
 
   const todos = (data ?? []) as Todo[];
 
@@ -61,8 +66,12 @@ export default async function TodosPage() {
             </div>
 
             <div className="row" style={{ marginTop: 8 }}>
-              <Link className="btn" href={`/todos/${t.id}`}>詳細</Link>
-              <Link className="btn" href={`/todos/${t.id}/edit`}>編集</Link>
+              <Link className="btn" href={`/todos/${t.id}`}>
+                詳細
+              </Link>
+              <Link className="btn" href={`/todos/${t.id}/edit`}>
+                編集
+              </Link>
             </div>
           </li>
         ))}
