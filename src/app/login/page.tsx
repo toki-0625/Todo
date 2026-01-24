@@ -1,4 +1,3 @@
-// src/app/login/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -14,24 +13,34 @@ export default function LoginPage() {
   const onLogin = async () => {
     setMsg("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    console.log("[login] start", { email: email.trim() });
 
-    if (error) {
-      setMsg(`ログイン失敗: ${error.message}`);
-      return;
+    try {
+      const res = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      console.log("[login] signInWithPassword result", res);
+
+      if (res.error) {
+        setMsg(`ログイン失敗: ${res.error.message}`);
+        return;
+      }
+
+      const sessionRes = await supabase.auth.getSession();
+      console.log("[login] getSession result", sessionRes);
+
+      if (!sessionRes.data.session) {
+        setMsg("ログイン後セッションが取得できません（保存に失敗してる可能性）");
+        return;
+      }
+
+      router.replace("/todos");
+    } catch (e: any) {
+      console.error("[login] unexpected error", e);
+      setMsg(`予期しないエラー: ${String(e?.message ?? e)}`);
     }
-
-    // 念のため：セッションが保存されたか確認してから遷移
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      setMsg("ログインは成功したはずなのにセッションが取得できませんでした");
-      return;
-    }
-
-    router.replace("/todos");
   };
 
   return (
