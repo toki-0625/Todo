@@ -2,86 +2,65 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState("");
+  const [msg, setMsg] = useState<string>("");
 
   const onLogin = async () => {
     setMsg("");
 
-    console.log("[login] start", { email: email.trim() });
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-    try {
-      const res = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+    const data = (await res.json()) as { ok: boolean; message?: string };
 
-      console.log("[login] signInWithPassword result", res);
-
-      if (res.error) {
-        setMsg(`ログイン失敗: ${res.error.message}`);
-        return;
-      }
-
-      const sessionRes = await supabase.auth.getSession();
-      console.log("[login] getSession result", sessionRes);
-
-      if (!sessionRes.data.session) {
-        setMsg("ログイン後セッションが取得できません（保存に失敗してる可能性）");
-        return;
-      }
-
-      router.replace("/todos");
-    } catch (e: any) {
-      console.error("[login] unexpected error", e);
-      setMsg(`予期しないエラー: ${String(e?.message ?? e)}`);
+    if (!res.ok || !data.ok) {
+      setMsg(`ログイン失敗: ${data.message ?? "不明なエラー"}`);
+      return;
     }
+
+    // ✅ cookie がブラウザに保存されてから遷移
+    router.push("/todos");
+    router.refresh();
   };
 
   return (
-    <main className="card" style={{ padding: 24, maxWidth: 520 }}>
-      <h1 className="h1" style={{ margin: 0 }}>
-        ログイン
-      </h1>
+    <main style={{ padding: 24, maxWidth: 520 }}>
+      <h1>ログイン</h1>
 
-      <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
+      <div style={{ display: "grid", gap: 12 }}>
         <label>
           Email
           <input
-            className="input"
+            style={{ width: "100%", padding: 8 }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            autoComplete="email"
           />
         </label>
 
         <label>
           Password
           <input
-            className="input"
+            style={{ width: "100%", padding: 8 }}
             value={password}
             type="password"
             onChange={(e) => setPassword(e.target.value)}
             placeholder="password"
-            autoComplete="current-password"
           />
         </label>
 
-        <button className="btn btnPrimary" type="button" onClick={onLogin}>
+        <button onClick={onLogin} style={{ padding: 10 }}>
           ログイン
         </button>
 
-        {msg && (
-          <p className="muted" style={{ margin: 0 }}>
-            {msg}
-          </p>
-        )}
+        {msg && <p>{msg}</p>}
       </div>
     </main>
   );
