@@ -24,25 +24,24 @@ function formatDate(iso: string) {
 export default async function TodoDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const supabase = await createSupabaseServer();
 
   const {
     data: { user },
-    error: userErr,
   } = await supabase.auth.getUser();
-
-  if (userErr) {
-    // 認証情報が壊れてる/読めない時はログインへ寄せる
-    redirect("/login");
-  }
   if (!user) redirect("/login");
+
+  const { id } = await params;
+
+  // ★保険：URLが壊れてたら404
+  if (!id || id === "undefined") notFound();
 
   const { data, error } = await supabase
     .from("todos")
     .select("id,user_id,title,detail,created_at")
-    .eq("id", params.id)
+    .eq("id", id)
     .maybeSingle();
 
   if (error) {
