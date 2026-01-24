@@ -1,3 +1,4 @@
+// src/middleware.ts
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -9,33 +10,32 @@ export async function middleware(req: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get: (name) => req.cookies.get(name)?.value,
-        set: (name, value, options) => {
-          res.cookies.set({
-            name,
-            value,
-            ...options,
-            path: "/",        // ★ 必須
-          });
+        get(name: string) {
+          return req.cookies.get(name)?.value;
         },
-        remove: (name, options) => {
-          res.cookies.set({
-            name,
-            value: "",
-            ...options,
-            path: "/",        // ★ 必須
-          });
+        set(name: string, value: string, options: any) {
+          res.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: any) {
+          res.cookies.set({ name, value: "", ...options });
         },
       },
     }
   );
 
-  // ★ これがないと refresh されない
-  await supabase.auth.getSession();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // 🔴 未ログインで /todos 以下に来たら login へ
+  if (!user && req.nextUrl.pathname.startsWith("/todos")) {
+    const loginUrl = new URL("/login", req.url);
+    return NextResponse.redirect(loginUrl);
+  }
 
   return res;
 }
 
 export const config = {
-  matcher: ["/todos/:path*", "/login", "/signup", "/logout"],
+  matcher: ["/todos/:path*"],
 };
