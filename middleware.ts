@@ -1,40 +1,19 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+export function middleware(req: NextRequest) {
+  const hasSession =
+    req.cookies.has("sb-access-token") ||
+    req.cookies.has("sb-refresh-token");
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options) {
-          res.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options) {
-          res.cookies.set({ name, value: "", ...options });
-        },
-      },
-    }
-  );
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  // 🔴 未ログインならログインへ
-  if (!session && req.nextUrl.pathname !== "/login") {
+  // 未ログインで /todos に来たらログインへ
+  if (!hasSession && req.nextUrl.pathname.startsWith("/todos")) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  return res;
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next|api|login|favicon.ico).*)"],
-}
+  matcher: ["/todos/:path*"],
+};
