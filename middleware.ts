@@ -1,9 +1,12 @@
-// src/middleware.ts
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+  let response = NextResponse.next({
+    request: {
+      headers: req.headers,
+    },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,10 +17,10 @@ export async function middleware(req: NextRequest) {
           return req.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          res.cookies.set({ name, value, ...options });
+          response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: any) {
-          res.cookies.set({ name, value: "", ...options });
+          response.cookies.set({ name, value: "", ...options });
         },
       },
     }
@@ -27,13 +30,11 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 未ログインで /todos 以下 → /login
-  if (!user) {
-    const loginUrl = new URL("/login", req.url);
-    return NextResponse.redirect(loginUrl);
+  if (!user && req.nextUrl.pathname.startsWith("/todos")) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  return res;
+  return response;
 }
 
 export const config = {
