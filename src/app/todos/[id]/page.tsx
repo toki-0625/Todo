@@ -1,9 +1,6 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { notFound, redirect } from "next/navigation";
+import { createSupabaseServer } from "@/lib/supabaseServer";
 import DeleteButton from "./DeleteButton";
 
 type Todo = {
@@ -24,60 +21,31 @@ function formatDate(iso: string) {
   return `${yyyy}/${mm}/${dd} ${hh}:${mi}`;
 }
 
-export default function TodoDetailPage() {
-  const router = useRouter();
-  const params = useParams<{ id: string }>();
-  const id = params?.id;
+export default async function TodoDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const supabase = await createSupabaseServer();
 
-  const [todo, setTodo] = useState<Todo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [errMsg, setErrMsg] = useState("");
+  const {
+    data: { user },
+    error: userErr,
+  } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    if (!id) return;
+  if (userErr) {
+    // 認証情報が壊れてる/読めない時はログインへ寄せる
+    redirect("/login");
+  }
+  if (!user) redirect("/login");
 
-    const run = async () => {
-      setLoading(true);
-      setErrMsg("");
+  const { data, error } = await supabase
+    .from("todos")
+    .select("id,user_id,title,detail,created_at")
+    .eq("id", params.id)
+    .maybeSingle();
 
-      // 1) ログイン確認（ブラウザ側セッション）
-      const { data: userRes, error: userErr } = await supabase.auth.getUser();
-      if (userErr) {
-        setErrMsg(`認証確認に失敗: ${userErr.message}`);
-        setLoading(false);
-        return;
-      }
-      if (!userRes.user) {
-        router.replace("/login");
-        return;
-      }
-
-      // 2) Todo 取得（RLSが効く）
-      const { data, error } = await supabase
-        .from("todos")
-        .select("id,user_id,title,detail,created_at")
-        .eq("id", id)
-        .maybeSingle();
-
-      if (error) {
-        setErrMsg(`読み込み失敗: ${error.message}`);
-        setLoading(false);
-        return;
-      }
-      if (!data) {
-        // 見つからない or 権限なし
-        router.replace("/todos");
-        return;
-      }
-
-      setTodo(data as Todo);
-      setLoading(false);
-    };
-
-    run();
-  }, [id, router]);
-
-  if (loading) {
+  if (error) {
     return (
       <main className="card" style={{ padding: 20 }}>
         <div className="row" style={{ justifyContent: "space-between" }}>
@@ -85,51 +53,19 @@ export default function TodoDetailPage() {
             Todo詳細
           </h1>
           <Link className="btn" href="/todos">
-            一覧へ
+            一覧に戻る
           </Link>
         </div>
+
         <p className="muted" style={{ marginTop: 12 }}>
-          読み込み中…
+          読み込み失敗: {error.message}
         </p>
       </main>
     );
   }
 
-  if (errMsg) {
-    return (
-      <main className="card" style={{ padding: 20 }}>
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <h1 className="h1" style={{ margin: 0 }}>
-            Todo詳細
-          </h1>
-          <Link className="btn" href="/todos">
-            一覧へ
-          </Link>
-        </div>
-        <p className="muted" style={{ marginTop: 12 }}>
-          {errMsg}
-        </p>
-      </main>
-    );
-  }
-
-  if (!todo) {
-    return (
-      <main className="card" style={{ padding: 20 }}>
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <h1 className="h1" style={{ margin: 0 }}>
-            Todo詳細
-          </h1>
-          <Link className="btn" href="/todos">
-            一覧へ
-          </Link>
-        </div>
-        <p className="muted" style={{ marginTop: 12 }}>
-          そのTodoは存在しないか、閲覧権限がありません。
-        </p>
-      </main>
-    );
-  }
+  if (!data) notFound();
+  const todo = data as Todo;
 
   return (
     <main className="card" style={{ padding: 20 }}>
