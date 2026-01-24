@@ -1,12 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: req.headers,
-    },
-  });
+  const res = NextResponse.next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,27 +13,28 @@ export async function middleware(req: NextRequest) {
         get(name: string) {
           return req.cookies.get(name)?.value;
         },
-        set(name: string, value: string, options: any) {
-          response.cookies.set({ name, value, ...options });
+        set(name: string, value: string, options) {
+          res.cookies.set({ name, value, ...options });
         },
-        remove(name: string, options: any) {
-          response.cookies.set({ name, value: "", ...options });
+        remove(name: string, options) {
+          res.cookies.set({ name, value: "", ...options });
         },
       },
     }
   );
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user && req.nextUrl.pathname.startsWith("/todos")) {
+  // 🔴 未ログインならログインへ
+  if (!session && req.nextUrl.pathname !== "/login") {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  return response;
+  return res;
 }
 
 export const config = {
-  matcher: ["/todos/:path*"],
+  matcher: ["/((?!_next|favicon.ico).*)"],
 };
