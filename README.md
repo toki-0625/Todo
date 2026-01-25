@@ -9,7 +9,7 @@ Next.js（App Router）と Supabase を使用して作成した、
 ---
 
 ## Demo
-https://todo-gold-omega.vercel.app/
+- URL：https://todo-gold-omega.vercel.app/
 - ID：port-test-user-1024@gmail.com
 - パスワード：dfbgsafdgSAhahwurei8y7rt
 
