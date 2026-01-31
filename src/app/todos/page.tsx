@@ -1,7 +1,11 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createSupabaseServer } from "@/lib/supabaseServer";
+
 
 type Todo = {
   id: string;
