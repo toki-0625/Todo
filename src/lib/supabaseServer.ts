@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
 export async function createSupabaseServer() {
-  const cookieStore = await cookies(); // ★ 必須
+  const cookieStore = await cookies();
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,8 +11,12 @@ export async function createSupabaseServer() {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value;
+          // ★重要：undefined じゃなく null を返す
+          return cookieStore.get(name)?.value ?? null;
         },
+        // Server Component では書き込みできないので no-op（ただしキーは用意）
+        set() {},
+        remove() {},
       },
     }
   );
